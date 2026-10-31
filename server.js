@@ -20,18 +20,16 @@ const projects = [
 
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { "Content-Type": "application/json" });
-  res.end(data);
+  res.end(JSON.stringify(data));
 }
 
 const server = http.createServer((req, res) => {
   // runs once for EVERY request that arrives
   console.log(req.method, req.url);
-  if (req.method === "GET") {
-    if (req.url === "/health") {
-      sendJson(res, 200, { status: "ok" });
-    } else if (req.url === "/projects") {
-      sendJson(res, 200, JSON.stringify(projects));
-    }
+  if (req.method === "GET" && req.url === "/health") {
+    sendJson(res, 200, { status: "ok" });
+  } else if (req.method === "GET" && req.url === "/projects") {
+    sendJson(res, 200, projects);
   } else {
     sendJson(res, 404, { error: "Not found" });
   }
