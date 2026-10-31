@@ -40,11 +40,11 @@ function validateProject(body) {
 let nextId = 0;
 
 projects.forEach((val) => {
-  if (val.id > id) {
-    id = val.id;
+  if (val.id > nextId) {
+    nextId = val.id;
   }
 });
-id++;
+nextId++;
 const server = http.createServer((req, res) => {
   // runs once for EVERY request that arrives
   console.log(req.method, req.url);
@@ -80,7 +80,7 @@ const server = http.createServer((req, res) => {
         branch: parsed.branch ?? "main",
         createdAt: new Date().toISOString(),
       };
-      id++;
+      nextId++;
       projects.push(project);
       sendJson(res, 201, project);
     });
