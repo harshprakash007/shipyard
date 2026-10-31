@@ -18,6 +18,14 @@ const projects = [
   },
 ];
 
+function isHttpsUrl(text) {
+  try {
+    return new URL(text).protocol === "https:";
+  } catch (err) {
+    return false;
+  }
+}
+
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { "Content-Type": "application/json" });
   res.end(JSON.stringify(data));
@@ -32,6 +40,10 @@ function validateProject(body) {
 
   if (typeof body.name !== "string" || body.name.trim() === "") {
     errors.push("name must be a non-empty string");
+  }
+
+  if (typeof body.repoUrl !== "string" || !isHttpsUrl(body.repoUrl)) {
+    errors.push("repoUrl must be an https URL");
   }
 
   return errors;
