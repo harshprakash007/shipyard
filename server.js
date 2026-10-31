@@ -22,6 +22,21 @@ function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { "Content-Type": "application/json" });
   res.end(JSON.stringify(data));
 }
+
+function validateProject(body) {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return ["Body must be a JSON object"];
+  }
+
+  const errors = [];
+
+  if (typeof body.name !== "string" || body.name.trim() === "") {
+    errors.push("name must be a non-empty string");
+  }
+
+  return errors;
+}
+
 let nextId = 0;
 
 projects.forEach((val) => {
@@ -52,8 +67,14 @@ const server = http.createServer((req, res) => {
         return;
       }
 
+      const errors = validateProject(parsed);
+      if (errors.length > 0) {
+        sendJson(res, 422, { errors });
+        return;
+      }
+
       const project = {
-        id: id,
+        id: nextId,
         name: parsed.name,
         repoUrl: parsed.repoUrl,
         branch: parsed.branch ?? "main",
