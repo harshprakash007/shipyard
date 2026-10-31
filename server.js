@@ -22,7 +22,14 @@ function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { "Content-Type": "application/json" });
   res.end(JSON.stringify(data));
 }
+let nextId = 0;
 
+projects.forEach((val) => {
+  if (val.id > id) {
+    id = val.id;
+  }
+});
+id++;
 const server = http.createServer((req, res) => {
   // runs once for EVERY request that arrives
   console.log(req.method, req.url);
@@ -30,6 +37,32 @@ const server = http.createServer((req, res) => {
     sendJson(res, 200, { status: "ok" });
   } else if (req.method === "GET" && req.url === "/projects") {
     sendJson(res, 200, projects);
+  } else if (req.method === "POST" && req.url === "/projects") {
+    let data = "";
+    req.setEncoding("utf-8");
+    req.on("data", (chunk) => {
+      data += chunk;
+    });
+    req.on("end", () => {
+      let parsed;
+      try {
+        parsed = JSON.parse(data);
+      } catch (err) {
+        sendJson(res, 400, { error: "Invalid JSON" });
+        return;
+      }
+
+      const project = {
+        id: id,
+        name: parsed.name,
+        repoUrl: parsed.repoUrl,
+        branch: parsed.branch ?? "main",
+        createdAt: new Date().toISOString(),
+      };
+      id++;
+      projects.push(project);
+      sendJson(res, 201, project);
+    });
   } else {
     sendJson(res, 404, { error: "Not found" });
   }
