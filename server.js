@@ -1,14 +1,39 @@
 import http from "node:http";
 
+const projects = [
+  {
+    id: 1,
+    name: "my-blog",
+    repoUrl: "https://github.com/someone/my-blog",
+    branch: "main",
+    createdAt: "2026-10-29T10:00:00.000Z",
+  },
+
+  {
+    id: 2,
+    name: "m-blog",
+    repoUrl: "https://github.com/someone/m-blog",
+    branch: "main",
+    createdAt: "2026-10-29T10:00:00.000Z",
+  },
+];
+
+function sendJson(res, statusCode, data) {
+  res.writeHead(statusCode, { "Content-Type": "application/json" });
+  res.end(data);
+}
+
 const server = http.createServer((req, res) => {
   // runs once for EVERY request that arrives
   console.log(req.method, req.url);
-  if (req.method === "GET" && req.url === "/health") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok" }));
+  if (req.method === "GET") {
+    if (req.url === "/health") {
+      sendJson(res, 200, { status: "ok" });
+    } else if (req.url === "/projects") {
+      sendJson(res, 200, JSON.stringify(projects));
+    }
   } else {
-    res.writeHead(404, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ error: "Not found" }));
+    sendJson(res, 404, { error: "Not found" });
   }
 });
 
