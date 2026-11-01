@@ -35,6 +35,12 @@ function isValidName(name) {
   );
 }
 
+function duplicateName(name) {
+  return projects.some((val) => {
+    return val.name === name;
+  });
+}
+
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { "Content-Type": "application/json" });
   res.end(JSON.stringify(data));
@@ -103,6 +109,13 @@ const server = http.createServer((req, res) => {
         return;
       }
 
+      if (duplicateName(parsed.name)) {
+        sendJson(res, 409, {
+          error: `A project named ${parsed.name} already exists`,
+        });
+        return;
+      }
+
       const project = {
         id: nextId,
         name: parsed.name,
@@ -110,6 +123,7 @@ const server = http.createServer((req, res) => {
         branch: parsed.branch ?? "main",
         createdAt: new Date().toISOString(),
       };
+
       nextId++;
       projects.push(project);
       sendJson(res, 201, project);
