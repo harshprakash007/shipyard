@@ -26,6 +26,15 @@ function isHttpsUrl(text) {
   }
 }
 
+function isValidName(name) {
+  return (
+    /^[a-z0-9-]+$/.test(name) &&
+    !name.startsWith("-") &&
+    !name.endsWith("-") &&
+    name.length <= 63
+  );
+}
+
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, { "Content-Type": "application/json" });
   res.end(JSON.stringify(data));
@@ -38,12 +47,21 @@ function validateProject(body) {
 
   const errors = [];
 
-  if (typeof body.name !== "string" || body.name.trim() === "") {
-    errors.push("name must be a non-empty string");
+  if (typeof body.name !== "string" || !isValidName(body.name)) {
+    errors.push(
+      "name must be 1-63 lowercase letters, numbers or hyphens, and can't start or end with a hyphen",
+    );
   }
 
   if (typeof body.repoUrl !== "string" || !isHttpsUrl(body.repoUrl)) {
     errors.push("repoUrl must be an https URL");
+  }
+
+  if (
+    body.branch !== undefined &&
+    (typeof body.branch !== "string" || body.branch.trim() === "")
+  ) {
+    errors.push("branch must be a non-empty string");
   }
 
   return errors;
